@@ -77,6 +77,13 @@ def parse_qs(req: falcon.Request) -> ParsedQS:
     if not isinstance(feeds, list): feeds = [feeds] # NOQA
     return ParsedQS(feeds, int(n), bool(full))
 
+def default_feeds() -> list:
+    urls = []
+    with open("./feeds.txt") as file:
+        for feed in file: 
+            feed = feed.strip() #or some other preprocessing
+            urls.append(feed) #storing everything in memory!
+    return urls
 
 class MixedFeed:
     """
@@ -106,6 +113,11 @@ class MixedFeed:
         Falcon GET handler.
         """
         feeds, n, full = parse_qs(req)
+        
+        if not feeds:
+            feeds = default_feeds()
+            n = 1
+
         summ = not full
         fm = FeedMixer(feeds=feeds, num_keep=n, prefer_summary=summ,
                        title=self.title, desc=self.desc, link=req.uri,
@@ -134,7 +146,6 @@ class MixedFeed:
         else:
             resp.content_type = "application/{}+xml".format(self.ftype)
         resp.status = falcon.HTTP_200
-
 
 def wsgi_app(title='FeedMixer feed',
         desc='{type} feed created by FeedMixer.',
