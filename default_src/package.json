@@ -4,11 +4,13 @@
   "description": "",
   "main": "normalize.js",
   "scripts": {
-    "parse": "node normalize.js"
+    "parse": "node normalize.js",
+    "fetch": "node list-feeds.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "googleapis": "^51.0.0",
     "jsdom": "^16.2.2"
   },
   "devDependencies": {

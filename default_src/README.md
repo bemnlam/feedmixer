@@ -11,4 +11,12 @@ npm install
 npm run parse
 ```
 
+### if you have youtube API key...
+
+```
+echo {{your api key}} > apikey.txt
+npm install
+npm run fetch
+```
+
 After that, the `../feeds.txt` file will be updated.
