@@ -1,0 +1,19 @@
+version: '3'
+services:
+  application:
+    image: feedmixer
+    container_name: feedmixer
+    build: . # build from src
+    ports: # host:guest
+      - 80:8000
+    restart: unless-stopped
+    volumes:
+      - default_feeds:/app/default_feeds
+  
+volumes:
+  default_feeds:
+    driver: local
+    driver_opts:
+      type: none
+      device: $PWD/default_src/default_feeds/
+      o: bind
