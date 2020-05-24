@@ -79,7 +79,7 @@ def parse_qs(req: falcon.Request) -> ParsedQS:
 
 def default_feeds() -> list:
     urls = []
-    with open("./feeds.txt") as file:
+    with open("./default_feeds/feeds.txt") as file:
         for feed in file: 
             feed = feed.strip() #or some other preprocessing
             urls.append(feed) #storing everything in memory!

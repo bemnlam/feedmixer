@@ -8,7 +8,8 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV PIPENV_VENV_IN_PROJECT yes
 COPY Pipfile Pipfile.lock feedmixer_api.py feedmixer_wsgi.py feedmixer.py /app/
-COPY feeds.txt /app/
+RUN mkdir /app/default_feeds
+# COPY feeds.txt /app/default_feeds
 
 WORKDIR /app/
 RUN pipenv --three sync && apt purge
