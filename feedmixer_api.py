@@ -142,9 +142,9 @@ class MixedFeed:
 
         if self.ftype == 'json':
             # special case content_type for JSON
-            resp.content_type = "application/json"
+            resp.content_type = "application/json; charset=utf-8"
         else:
-            resp.content_type = "application/{}+xml".format(self.ftype)
+            resp.content_type = "application/{}+xml; charset=utf-8".format(self.ftype)
         resp.status = falcon.HTTP_200
 
 def wsgi_app(title='FeedMixer feed',
