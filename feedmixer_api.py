@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 FeedMixer is a WSGI micro web service which takes a list of feed URLs and
 returns a new feed consisting of the most recent `n` entries from each given
@@ -95,6 +96,7 @@ class MixedFeed:
     """
     def __init__(self, ftype='atom', title='FeedMixer feed',
                  desc='{type} feed created by FeedMixer.',
+                 max_feeds=100,
                  sess: requests.session=requests.session()) -> None:
         """
         :param ftype: one of 'atom', 'rss', or 'json'
@@ -107,6 +109,7 @@ class MixedFeed:
         self.title = title
         self.desc = desc.format(type=ftype)
         self.sess = sess
+        self.max_feeds = max_feeds
 
     def on_get(self, req: falcon.Request, resp: falcon.Response) -> None:
         """
@@ -120,7 +123,8 @@ class MixedFeed:
 
         summ = not full
         fm = FeedMixer(feeds=feeds, num_keep=n, prefer_summary=summ,
-                       title=self.title, desc=self.desc, link=req.uri,
+                       title=self.title, desc=self.desc, link=req.uri, 
+                       max_feeds=self.max_feeds,
                        sess=self.sess)
 
         # dynamically find and call appropriate method based on ftype:
@@ -155,9 +159,9 @@ def wsgi_app(title='FeedMixer feed',
 
     See `FeedMixer` docstring for parameter descriptions.
     """
-    atom = MixedFeed(ftype='atom', title=title, desc=desc, sess=sess)
-    rss = MixedFeed(ftype='rss', title=title, desc=desc, sess=sess)
-    jsn = MixedFeed(ftype='json', title=title, desc=desc, sess=sess)
+    atom = MixedFeed(ftype='atom', title=title, desc=desc, sess=sess, max_feeds=1000)
+    rss = MixedFeed(ftype='rss', title=title, desc=desc, sess=sess, max_feeds=1000)
+    jsn = MixedFeed(ftype='json', title=title, desc=desc, sess=sess, max_feeds=1000)
 
     api = falcon.API()
     api.add_route('/atom', atom)
