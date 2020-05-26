@@ -62,7 +62,9 @@ import urllib.parse
 
 ParsedQS = NamedTuple('ParsedQS', [('f', List[str]),
                                    ('n', int),
-                                   ('full', bool)])
+                                   ('full', bool),
+                                   ('start', int),
+                                   ('rows', int)])
 
 
 def parse_qs(req: falcon.Request) -> ParsedQS:
@@ -75,8 +77,10 @@ def parse_qs(req: falcon.Request) -> ParsedQS:
     feeds = qs.get('f', [])
     n = qs.get('n', 0)
     full = qs.get('full', False)
+    start = qs.get('start', 0)
+    rows = qs.get('rows', 1)
     if not isinstance(feeds, list): feeds = [feeds] # NOQA
-    return ParsedQS(feeds, int(n), bool(full))
+    return ParsedQS(feeds, int(n), bool(full), int(start), int(rows))
 
 def default_feeds() -> list:
     urls = []
@@ -115,12 +119,11 @@ class MixedFeed:
         """
         Falcon GET handler.
         """
-        feeds, n, full = parse_qs(req)
+        feeds, n, full, start, rows = parse_qs(req)
         
         if not feeds:
-            feeds = default_feeds()
-            n = 1
-
+            feeds = default_feeds()[start:(start+rows)]
+        
         summ = not full
         fm = FeedMixer(feeds=feeds, num_keep=n, prefer_summary=summ,
                        title=self.title, desc=self.desc, link=req.uri, 
@@ -153,15 +156,16 @@ class MixedFeed:
 
 def wsgi_app(title='FeedMixer feed',
         desc='{type} feed created by FeedMixer.',
+        max_feeds=1000,
         sess: requests.session=requests.session()) -> falcon.API:
     """
     Creates the Falcon api object (a WSGI-compliant callable)
 
     See `FeedMixer` docstring for parameter descriptions.
     """
-    atom = MixedFeed(ftype='atom', title=title, desc=desc, sess=sess, max_feeds=1000)
-    rss = MixedFeed(ftype='rss', title=title, desc=desc, sess=sess, max_feeds=1000)
-    jsn = MixedFeed(ftype='json', title=title, desc=desc, sess=sess, max_feeds=1000)
+    atom = MixedFeed(ftype='atom', title=title, desc=desc, sess=sess, max_feeds=max_feeds)
+    rss = MixedFeed(ftype='rss', title=title, desc=desc, sess=sess, max_feeds=max_feeds)
+    jsn = MixedFeed(ftype='json', title=title, desc=desc, sess=sess, max_feeds=max_feeds)
 
     api = falcon.API()
     api.add_route('/atom', atom)
